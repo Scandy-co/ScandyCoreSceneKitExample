@@ -103,6 +103,9 @@
   flip.m33 *= -1;
   modelNode.transform = flip;
 
+  // Apparently this ship is HUGE
+  modelNode.scale = SCNVector3Make( 10, 10, 10);
+
   // animate the 3d object
   [modelNode runAction:[SCNAction repeatAction:[SCNAction rotateByX:0 y:2 z:0 duration:1] count:6]];
 
@@ -218,7 +221,7 @@ UIImage * convertBitmapRGBA8ToUIImage(char* buffer, int width, int height ) {
   [super viewDidLoad];
 
   // create a new scene
-  SCNScene *scene = [SCNScene scene];
+  SCNScene *scene = [SCNScene sceneNamed:@"art.scnassets/ship.scn"];
 
   // create and add a camera to the scene
   SCNNode *cameraNode = [SCNNode node];
@@ -227,7 +230,7 @@ UIImage * convertBitmapRGBA8ToUIImage(char* buffer, int width, int height ) {
   [scene.rootNode addChildNode:cameraNode];
 
   // place the camera
-  cameraNode.position = SCNVector3Make(0, 0, 1);
+  cameraNode.position = SCNVector3Make(0, 0, 10);
 
   // create and add a light to the scene
   SCNNode *lightNode = [SCNNode node];
@@ -362,6 +365,30 @@ UIImage * convertBitmapRGBA8ToUIImage(char* buffer, int width, int height ) {
         // The img_data buffer is of size width x height
         @autoreleasepool {
           SCNView *scnView = (SCNView *)self.view;
+
+          // Ands lets rotate the ship to match the tracking
+          SCNNode *ship = [scnView.scene.rootNode childNodeWithName:@"ship" recursively:YES];
+          SCNMatrix4 mat = SCNMatrix4Identity;
+          mat.m11 = frame_metadata.computed_pose.homogeneous_matrix.v4[0].s[0];
+          mat.m12 = frame_metadata.computed_pose.homogeneous_matrix.v4[0].s[1];
+          mat.m13 = frame_metadata.computed_pose.homogeneous_matrix.v4[0].s[2];
+          mat.m14 = frame_metadata.computed_pose.homogeneous_matrix.v4[0].s[3];
+
+          mat.m21 = frame_metadata.computed_pose.homogeneous_matrix.v4[1].s[0];
+          mat.m22 = frame_metadata.computed_pose.homogeneous_matrix.v4[1].s[1];
+          mat.m23 = frame_metadata.computed_pose.homogeneous_matrix.v4[1].s[2];
+          mat.m24 = frame_metadata.computed_pose.homogeneous_matrix.v4[1].s[3];
+
+          mat.m31 = frame_metadata.computed_pose.homogeneous_matrix.v4[2].s[0];
+          mat.m32 = frame_metadata.computed_pose.homogeneous_matrix.v4[2].s[1];
+          mat.m33 = frame_metadata.computed_pose.homogeneous_matrix.v4[2].s[2];
+          mat.m34 = frame_metadata.computed_pose.homogeneous_matrix.v4[2].s[3];
+
+          mat.m41 = frame_metadata.computed_pose.homogeneous_matrix.v4[3].s[0];
+          mat.m42 = frame_metadata.computed_pose.homogeneous_matrix.v4[3].s[1];
+          mat.m43 = frame_metadata.computed_pose.homogeneous_matrix.v4[3].s[2];
+          mat.m44 = frame_metadata.computed_pose.homogeneous_matrix.v4[3].s[3];
+          ship.transform = mat;
 
           /** NOTE: this is a widly in-effecient function and only meant to illustrate how you CAN get the data.
            You should implement something that doesn't constantly destroy the inbetween buffers
