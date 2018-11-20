@@ -8,6 +8,7 @@
 
 #include <scandy/core/IScandyCore.h>
 #include <scandy/core/getStatusString.h>
+#include <scandy/utilities/vector_math.h>
 
 #import "GameViewController.h"
 
@@ -369,6 +370,7 @@ UIImage * convertBitmapRGBA8ToUIImage(char* buffer, int width, int height ) {
           // Ands lets rotate the ship to match the tracking
           SCNNode *ship = [scnView.scene.rootNode childNodeWithName:@"ship" recursively:YES];
           SCNMatrix4 mat = SCNMatrix4Identity;
+          // frame_metadata.computed_pose.homogeneous_matrix holds the last computed pose from Scandy Core
           mat.m11 = frame_metadata.computed_pose.homogeneous_matrix.v4[0].s[0];
           mat.m12 = frame_metadata.computed_pose.homogeneous_matrix.v4[0].s[1];
           mat.m13 = frame_metadata.computed_pose.homogeneous_matrix.v4[0].s[2];
@@ -389,6 +391,13 @@ UIImage * convertBitmapRGBA8ToUIImage(char* buffer, int width, int height ) {
           mat.m43 = frame_metadata.computed_pose.homogeneous_matrix.v4[3].s[2];
           mat.m44 = frame_metadata.computed_pose.homogeneous_matrix.v4[3].s[3];
           ship.transform = mat;
+
+          // You can also get the translation part seperately
+          scandy::utilities::float4 translation = scandy::utilities::translationVector(frame_metadata.computed_pose.homogeneous_matrix);
+
+          // You can also get the orientation vector from the matrix
+          scandy::utilities::float3 orientation;
+          scandy::utilities::get_orientation(frame_metadata.computed_pose.homogeneous_matrix, orientation);
 
           /** NOTE: this is a widly in-effecient function and only meant to illustrate how you CAN get the data.
            You should implement something that doesn't constantly destroy the inbetween buffers
