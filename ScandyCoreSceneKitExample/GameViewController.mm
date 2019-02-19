@@ -7,7 +7,6 @@
 //
 
 #include <scandy/core/IScandyCore.h>
-#include <scandy/core/getStatusString.h>
 #include <scandy/utilities/vector_math.h>
 
 #import "GameViewController.h"
